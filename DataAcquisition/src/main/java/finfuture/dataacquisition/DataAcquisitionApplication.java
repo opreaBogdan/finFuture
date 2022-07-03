@@ -1,30 +1,25 @@
 package finfuture.dataacquisition;
 
+import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import com.netflix.discovery.shared.Application;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.MediaType;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 //@EnableScheduling
 @SpringBootApplication
 @RestController
+@EnableEurekaClient
 public class DataAcquisitionApplication {
 
     @Autowired
@@ -45,6 +40,21 @@ public class DataAcquisitionApplication {
             value = "/whoami/{username}",
             produces = MediaType.TEXT_PLAIN_VALUE)
     public String whoami(@PathVariable("username") String username) {
+        List<Application> applications = eurekaClient.getApplications().getRegisteredApplications();
+
+        for (Application application : applications) {
+            List<InstanceInfo> applicationsInstances = application.getInstances();
+            System.out.println("~~~~~~~~~~~~~~~~ " + applicationsInstances.size());
+
+            for (InstanceInfo applicationsInstance : applicationsInstances) {
+
+                String name = applicationsInstance.getAppName();
+                String url = applicationsInstance.getHomePageUrl();
+                int port = applicationsInstance.getPort();
+                String IP = applicationsInstance.getIPAddr();
+                System.out.println(IP + ":" + port + "------>" + name + ": " + url);
+            }
+        }
         return String.format("Hello! You're %s and you'll become a(n) %s...\n", username, role);
     }
 
