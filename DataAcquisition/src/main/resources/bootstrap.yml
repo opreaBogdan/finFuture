@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: config-client #FinFuture-DataAcquisition
+  profiles:
+    active:
+      development
+
+  cloud:
+    config:
+      enabled: true
+      uri: http://localhost:8888
+      label: main
